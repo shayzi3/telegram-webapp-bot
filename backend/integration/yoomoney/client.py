@@ -9,7 +9,7 @@ from core import settings
 
 
 
-class Yoomoney:
+class YoomoneyManager:
      
      async def payment_link(
           self,
@@ -68,5 +68,5 @@ class Yoomoney:
           )
      
 
-yoomoney_client = Yoomoney()
+yoomoney_client = YoomoneyManager()
      

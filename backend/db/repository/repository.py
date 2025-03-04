@@ -55,6 +55,7 @@ class Repository(Generic[Model], AbstractRepository):
           cls, 
           session: AsyncSession, 
           write_in_redis: bool = True,
+          *args,
           **extras
      ) -> Model | None:
           """extras - where value"""
@@ -82,7 +83,7 @@ class Repository(Generic[Model], AbstractRepository):
      ) -> None:
           """extras - values while need update"""
           sttm = (
-               update(cls.model).filter_by(**where).values(**extras)
+               update(cls.model).filter_by(**where).values(**extras).returning()
           )
           await session.execute(sttm)
           await session.commit()
@@ -100,7 +101,7 @@ class Repository(Generic[Model], AbstractRepository):
           clear_in_redis: bool = True
      ) -> None:
           sttm = (
-               delete(cls.model).filter_by(**where)
+               delete(cls.model).filter_by(**where).returning()
           )
           await session.execute(sttm)
           await session.commit()

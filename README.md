@@ -11,9 +11,12 @@ dishka
 FastAPI
 pydantic
 
+
+
 Fronend:
 
 flet
+pydantic
 
 
 

@@ -15,7 +15,7 @@ M = TypeVar("M")
 
 class Base(AsyncAttrs, DeclarativeBase, Generic[M]):
      __pydantic_model__ = Any
-    
+     
      def to_pydantic(self) -> M:
           return self.__pydantic_model__(**self.__dict__)
 
