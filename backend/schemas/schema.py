@@ -56,13 +56,3 @@ class ItemModel(BaseModel, RedisManager["ItemModel"]):
      @property
      def redis_key(self) -> str:
           return f"item:{self.id}"
-     
-     
-     def to_redis(self) -> str:
-          return json.dumps(self.__dict__)
-     
-     
-     @classmethod
-     def from_redis(cls, model: str) -> "ItemModel":
-          decode_model = json.loads(model)
-          return cls(**decode_model)

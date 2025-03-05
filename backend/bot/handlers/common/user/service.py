@@ -15,11 +15,10 @@ class UserService:
           self, 
           id: int,
           name: str,
-          container: AsyncContainer
+          session: AsyncSession
      ) -> None:
           user = await UserModel.get_from_redis(f"user:{id}")
           if user is None:
-               session = await container.get(AsyncSession)
                user = await self.user_repository.read(
                     id=id,
                     write_in_redis=True,

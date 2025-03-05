@@ -7,8 +7,8 @@ from dishka.integrations.aiogram import setup_dishka
 from bot.handlers import __routers__
 from app.api.v1.routers import __api_routers__
 from core import bot, dp, settings
+from bot.midlewares import TimeoutMiddleware
 from bot.provider import container
-from bot.midlewares import TimeoutMiddleware, InjectContainerMiddleware
 
 
 
@@ -17,7 +17,6 @@ async def lifespan(_: FastAPI):
      dp.include_routers(*__routers__)
      
      dp.message.middleware(TimeoutMiddleware())
-     dp.message.middleware(InjectContainerMiddleware())
      
      setup_dishka(container=container, router=dp, auto_inject=True)
      

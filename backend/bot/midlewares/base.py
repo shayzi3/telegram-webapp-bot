@@ -1,13 +1,13 @@
 from typing import Any, Callable, Awaitable
 from datetime import datetime, timedelta
 from aiogram.types import Message
-from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.provider import container
 from db.repository import UserRepository
 from schemas import UserModel
 from core import settings
+from bot.provider import container
 
 
 
@@ -33,20 +33,6 @@ class TimeoutMiddleware(BaseMiddleware):
      
      
      
-class InjectContainerMiddleware(BaseMiddleware):
-     
-     
-     async def __call__(
-          self, 
-          handler: Callable[[Message, dict[str, Any]], Awaitable[Any]], 
-          event: Message, 
-          data: dict[str, Any]
-     ) -> None:
-          event.__dict__["dishka"] = container
-          return await handler(event, data)
-     
-     
-     
 class IsAdminMiddleware(BaseMiddleware):
      
      
@@ -59,9 +45,10 @@ class IsAdminMiddleware(BaseMiddleware):
           if event.from_user.id in settings.admins:
                return await handler(event, data)
           
-          session = await container.get(AsyncSession)
+          
           user = await UserModel.get_from_redis(f"user:{event.from_user.id}")
           if user is None:
+               session = await container.get(AsyncSession)
                user = await UserRepository().read(
                     session=session,
                     write_in_redis=True,

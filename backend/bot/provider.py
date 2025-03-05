@@ -10,7 +10,7 @@ from db.session import Session
 
 
 
-class TelegramProvider(Provider):
+class InjectProvider(Provider):
      
      @provide(scope=Scope.APP)
      async def get_user_service(self) -> UserService:
@@ -29,9 +29,7 @@ class TelegramProvider(Provider):
                     yield session
                finally:
                     await session.close()
-                    
-
      
      
-container = make_async_container(TelegramProvider(), AiogramProvider())
+container = make_async_container(InjectProvider(), AiogramProvider())
           

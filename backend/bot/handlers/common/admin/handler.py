@@ -2,20 +2,21 @@ from aiogram import Router, F
 from aiogram.filters.command import Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
-from dishka import FromDishka
+from sqlalchemy.ext.asyncio import AsyncSession
 from dishka.integrations.aiogram import inject
+from dishka import FromDishka
 
 from .service import AdminService
 from bot.utils.states import NewItemState
 from bot.midlewares import IsAdminMiddleware
 
 
-admin_router = Router(name=__name__)
+admin_router = Router(name="admin_router")
 admin_router.message.middleware(IsAdminMiddleware())
 
 
+
 @admin_router.message(Command("new_item"))
-@inject
 async def new_item(message: Message, state: FSMContext) -> None:
      await state.set_state(NewItemState.name)
      await message.answer("Название товара")
@@ -44,18 +45,19 @@ async def new_item_price(message: Message, state: FSMContext) -> None:
      await state.set_state(NewItemState.image) 
      await message.answer("Картинка товара")
      
-        
+     
 @admin_router.message(NewItemState.image, F.text)
 @inject
 async def new_item_photo(
      message: Message, 
      state: FSMContext,
+     session: FromDishka[AsyncSession],
      service: FromDishka[AdminService]
 ) -> None:
      await state.update_data(image=message.text)
      
      response = await service.new_item(
-          container=message.dishka,
+          session=session,
           data=await state.get_data()
      )
      if response is False:
@@ -70,6 +72,7 @@ async def new_item_photo(
 @inject
 async def new_admin(
      message: Message,
+     session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
 ) -> None:
      ...

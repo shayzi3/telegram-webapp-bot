@@ -2,6 +2,7 @@ from typing import Any
 from aiogram import Bot
 from aiogram.types import Message
 from httpx import AsyncClient
+from loguru import logger
 
 from bot.utils.inline_buttons import url_button_builder
 from .schema import YoomoneyResponse, PaymentType
@@ -41,6 +42,8 @@ class YoomoneyManager:
           
           async with AsyncClient() as client:
                response = await client.post(url)
+               
+          logger.info(f"GENERATE PAYMENT LINK. LABEL: {label}")
           return response.text.split()[-1] # returns redirect url for pay
      
      
@@ -62,6 +65,8 @@ class YoomoneyManager:
           
           
      async def on_success(self, response: YoomoneyResponse, bot: Bot) -> Any:
+          logger.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id}")
+          
           return await bot.send_message(
                chat_id=int(response.label),
                text=f"{response.withdraw_amount} отправлены успешно! \nOperation: {response.operation_label}"
