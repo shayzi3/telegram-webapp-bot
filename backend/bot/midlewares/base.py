@@ -5,9 +5,9 @@ from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.repository import UserRepository
+from bot.provider import container
 from schemas import UserModel
 from core import settings
-from bot.provider import container
 
 
 
@@ -35,7 +35,6 @@ class TimeoutMiddleware(BaseMiddleware):
      
 class IsAdminMiddleware(BaseMiddleware):
      
-     
      async def __call__(
           self, 
           handler: Callable[[Message, dict[str, Any]], Awaitable[Any]], 
@@ -56,5 +55,5 @@ class IsAdminMiddleware(BaseMiddleware):
                )
                
           if user.is_admin is False:
-               return await event.message("Вы не администратор!")
+               return await event.answer("Вы не администратор!")
           return await handler(event, data)

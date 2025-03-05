@@ -1,4 +1,5 @@
 from typing import Any, Generic, TypeVar
+from loguru import logger
 
 from abc import ABC, abstractmethod
 from sqlalchemy import insert, select, update, delete
@@ -47,7 +48,8 @@ class Repository(Generic[Model], AbstractRepository):
                values(**extras)
           )
           await session.execute(sttm)
-          await session.commit()          
+          await session.commit()        
+          logger.debug(f"INSERT data in {cls.model.__tablename__}: {extras}")  
           
           
      @classmethod
@@ -59,6 +61,7 @@ class Repository(Generic[Model], AbstractRepository):
           **extras
      ) -> Model | None:
           """extras - where value"""
+          logger.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
           
           sttm = select(cls.model).filter_by(**extras)
           result = await session.execute(sttm)
@@ -69,7 +72,7 @@ class Repository(Generic[Model], AbstractRepository):
           
           model = cls.model.__pydantic_model__(**scalar.__dict__)
           if write_in_redis is True:
-               await model.write_in_redis(expire=200)
+               await model.write_in_redis(expire=500)
           return model
           
           
@@ -87,6 +90,7 @@ class Repository(Generic[Model], AbstractRepository):
           )
           await session.execute(sttm)
           await session.commit()
+          logger.debug(f"UPDATE data in {cls.model.__tablename__} WHERE {where} VALUES {extras}")
           
           if clear_in_redis:
                ...
@@ -105,6 +109,7 @@ class Repository(Generic[Model], AbstractRepository):
           )
           await session.execute(sttm)
           await session.commit()
+          logger.debug(f"DELETE data in {cls.model.__tablename__} WHERE {where}")
           
           if clear_in_redis:
                ...

@@ -20,25 +20,27 @@ async def start(
      session: FromDishka[AsyncSession],
      service: FromDishka[UserService]
 ) -> None:
-     text = f"Совершай покупки в WebApp приложении!"
-     await service.start(
+     result = await service.start(
           id=message.from_user.id,
           name=message.from_user.full_name,
           session=session,
      )
      await message.answer(
-          text=text, 
+          text=result, 
           reply_markup=webapp_button_builder(message.from_user.id),
      )
      
      
 @user_router.message(Command("skip"))
 async def skip(message: Message, state: FSMContext) -> None:
-     data = await state.get_state()
-     if data is not  None:
+     active_state = await state.get_state()
+     if active_state:
           await state.clear()
           return await message.answer("Событие пропущено")
      await message.answer("Событий не найдено")
+     
+     
+# User commands: /basket, /buy
      
      
           

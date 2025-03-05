@@ -29,6 +29,11 @@ class UserModel(BaseModel, RedisManager["UserModel"]):
           return f"user:{self.id}"
      
      
+     @property
+     def where(self) -> dict[str, str]:
+          return {"id": self.id}
+     
+     
      def to_redis(self):
           self.created_at = self.created_at.timestamp()
           self.basket = [item.to_redis() for item in self.basket]
@@ -45,6 +50,8 @@ class UserModel(BaseModel, RedisManager["UserModel"]):
      
      
      
+     
+     
 class ItemModel(BaseModel, RedisManager["ItemModel"]):
      id: str
      name: str
@@ -56,3 +63,8 @@ class ItemModel(BaseModel, RedisManager["ItemModel"]):
      @property
      def redis_key(self) -> str:
           return f"item:{self.id}"
+     
+     
+     @property
+     def where(self) -> str:
+          return {"id": self.id}

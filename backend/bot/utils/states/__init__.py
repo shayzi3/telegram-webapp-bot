@@ -1,6 +1,10 @@
-from .state import NewItemState
+from .state import (
+     NewItemDocState,
+     NewItemState
+)
 
 
 __all__ = [
      "NewItemState",
+     "NewItemDocState",
 ]

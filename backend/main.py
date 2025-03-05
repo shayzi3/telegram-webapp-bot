@@ -15,7 +15,6 @@ from bot.provider import container
 @asynccontextmanager
 async def lifespan(_: FastAPI):
      dp.include_routers(*__routers__)
-     
      dp.message.middleware(TimeoutMiddleware())
      
      setup_dishka(container=container, router=dp, auto_inject=True)

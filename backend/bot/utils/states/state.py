@@ -7,3 +7,7 @@ class NewItemState(StatesGroup):
      description = State()
      price = State()
      image = State()
+     
+     
+class NewItemDocState(StatesGroup):
+     document = State()

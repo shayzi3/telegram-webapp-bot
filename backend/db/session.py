@@ -5,5 +5,5 @@ from core import settings
 
 
 class Session:
-     eng = create_async_engine(settings.postgres, echo=True)
+     eng = create_async_engine(settings.postgres, echo=False)
      async_session = async_sessionmaker(eng)

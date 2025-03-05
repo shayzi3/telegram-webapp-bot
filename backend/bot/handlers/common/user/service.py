@@ -16,7 +16,7 @@ class UserService:
           id: int,
           name: str,
           session: AsyncSession
-     ) -> None:
+     ) -> str:
           user = await UserModel.get_from_redis(f"user:{id}")
           if user is None:
                user = await self.user_repository.read(
@@ -30,7 +30,7 @@ class UserService:
                          name=name,
                          session=session
                     )
-          return None
+          return "Совершай покупки в WebApp приложении!"
                
                
 async def get_user_service() -> UserService:
