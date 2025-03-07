@@ -28,7 +28,7 @@ async def yoomoney_webhook(request: Request) -> Response:
           kwargs[name[0]] = name[1] if len(name) > 1 else "" 
           
      await yoomoney_client.on_success(
-          response=YoomoneyResponse.from_dict(kwargs), 
+          response=YoomoneyResponse.model_validate(kwargs), 
           bot=bot
      )
      return Response()

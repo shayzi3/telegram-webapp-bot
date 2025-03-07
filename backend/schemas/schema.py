@@ -15,6 +15,8 @@ class UserModel(BaseModel, RedisManager["UserModel"]):
      created_at: datetime
      basket: list        # list[Item]
      
+     __redis_expire__ = 500
+     
      
      @field_validator("basket")
      @classmethod
@@ -51,7 +53,7 @@ class UserModel(BaseModel, RedisManager["UserModel"]):
      
      
      
-     
+    
 class ItemModel(BaseModel, RedisManager["ItemModel"]):
      id: str
      name: str
@@ -59,6 +61,8 @@ class ItemModel(BaseModel, RedisManager["ItemModel"]):
      price: int
      image: str
      
+     __redis_expire__ = 300
+     __offset_redis_expire__ = 150
      
      @property
      def redis_key(self) -> str:

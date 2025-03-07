@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.filters.command import Command
+from aiogram.filters.command import Command, CommandObject
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,7 +65,7 @@ async def new_item_photo(
           await state.clear()
      await message.answer(result)
      
-     
+  
          
 @admin_router.message(Command("new_item_doc"))
 async def new_item_doc(
@@ -93,46 +93,60 @@ async def new_item_doc_document(
 @inject
 async def delete_item(
      message: Message,
+     command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-     item_id: str | None = None
 ) -> None:
-     if item_id is None:
+     if command.args is None:
           return await message.answer("Пример использования: /delete_item item_id")
      
      result = await service.delete_item(
           session=session,
-          item_id=item_id
+          item_id=command.args
      )
      await message.answer(result)
     
+     
      
 @admin_router.message(Command("get_item"))
 @inject
 async def get_items(
      message: Message,
+     command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-     flag: str | None = None
 ) -> None:
-     """flag - id item or `all`"""
-          
-
+     if command.args is None:
+          return await message.answer("Пример использования: /get_item item_id или /get_item all")
+     
+     result = await service.get_items(
+          session=session,
+          item=command.args
+     )
+     if isinstance(result, str):
+          return await message.answer(result)
+     
+     await message.answer_photo(
+          photo=result[1],
+          reply_markup=result[0]
+     )
+         
+     
      
 @admin_router.message(Command("new_admin"))
 @inject
 async def new_admin(
      message: Message,
+     command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-     new_admin_id: str | None = None,
 ) -> None:
-     if new_admin_id is None:
+     if command.args is None:
           return await message.answer("Использование команды: /new_admin user_id")
      
      result = await service.new_admin(
           session=session,
-          new_admin_id=new_admin_id
+          new_admin_id=command.args
      )
      await message.answer(result)
      

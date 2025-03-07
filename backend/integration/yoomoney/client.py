@@ -65,7 +65,7 @@ class YoomoneyManager:
           
           
      async def on_success(self, response: YoomoneyResponse, bot: Bot) -> Any:
-          logger.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id}")
+          logger.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id} LABEL: {response.label}")
           
           return await bot.send_message(
                chat_id=int(response.label),

@@ -19,5 +19,8 @@ flet
 pydantic
 
 
-
 Integration: Yoomoney
+
+
+Проект направлен на изучение технологии webhook, а также на работу 
+с Redis, dishka, Yoomoney, FastAPI в связке с aiogram.

@@ -44,11 +44,10 @@ class IsAdminMiddleware(BaseMiddleware):
           if event.from_user.id in settings.admins:
                return await handler(event, data)
           
-          
           user = await UserModel.get_from_redis(f"user:{event.from_user.id}")
           if user is None:
                session = await container.get(AsyncSession)
-               user = await UserRepository().read(
+               user = await UserRepository.read(
                     session=session,
                     write_in_redis=True,
                     id=event.from_user.id

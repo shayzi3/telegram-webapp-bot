@@ -1,32 +1,22 @@
+from pydantic import BaseModel
 from datetime import datetime as time
-from dataclasses import dataclass, fields
-from typing import Any, Literal
+from typing import Literal
 
 
 PaymentType = Literal["AC", "PC"]
+NotificationType = Literal["p2p-incoming", "card-incoming"]
 
 
-@dataclass
-class YoomoneyResponse:
-     notification_type: str
+class YoomoneyResponse(BaseModel):
+     notification_type: NotificationType
      amount: float
      operation_id: str
      operation_label: str
      withdraw_amount: float
      currency: str
-     datetime: str
+     datetime: time
      label: str
      
-     def __post_init__(self) -> None:
-          self.amount = float(self.amount)
-          self.withdraw_amount = float(self.withdraw_amount)
-          self.datetime = time.now().strftime("%b %d %Y %H:%M:%S")
-          
-          
-     @classmethod
-     def from_dict(cls, payload: dict[str, Any]) -> "YoomoneyResponse":
-          data_fields = [field.name for field in fields(cls)]
-          return cls(**{key: value for key, value in payload.items() if key in data_fields})
           
      """
      notification_type:

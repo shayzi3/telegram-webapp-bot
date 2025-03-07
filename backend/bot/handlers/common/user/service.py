@@ -35,5 +35,5 @@ class UserService:
                
 async def get_user_service() -> UserService:
      return UserService(
-          user_repository=UserRepository()
+          user_repository=UserRepository
      )

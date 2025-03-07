@@ -29,7 +29,6 @@ association_table = Table(
 )
 
 
-
 class User(Base[UserModel]):
      __tablename__ = 'users'
      __pydantic_model__ = UserModel

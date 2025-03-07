@@ -1,17 +1,32 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
+
+from bot.utils.filters.callback import ItemCallback, PaginatorCallback
+from bot.utils.enums import PageMode
+from schemas import ItemModel
 from core import settings
 
 
 
+delete_message = InlineKeyboardMarkup(
+     inline_keyboard=[
+          [
+               InlineKeyboardButton(text="Удалить сообщение", callback_data="msg_delete")
+          ]
+     ]
+)
+
+
+
 def url_button_builder(text: str, url: str) -> InlineKeyboardMarkup:
-     build = InlineKeyboardBuilder()
+     keyboard = InlineKeyboardBuilder()
      
-     build.add(
+     keyboard.add(
           InlineKeyboardButton(text=text, url=url)
      )
-     return build.as_markup()
+     return keyboard.as_markup()
+
 
 
 
@@ -28,3 +43,55 @@ def webapp_button_builder(user_id: int) -> InlineKeyboardMarkup:
 
 
 
+def item_page_builder(
+     data: ItemModel, 
+     mode: PageMode,
+     data_len: int = 0,
+     offset: int = 0,
+     limit: int = 1,
+) -> InlineKeyboardMarkup:
+     keyboard = InlineKeyboardBuilder()
+     
+     keyboard.add(
+          InlineKeyboardButton(
+               text="Удалить",
+               callback_data=ItemCallback.from_model(data, "delete").pack()
+          ),
+          InlineKeyboardButton(
+               text="Изменить",
+               callback_data=ItemCallback.from_model(data, "change").pack()
+          ),
+          InlineKeyboardButton(
+               text="Просмотреть информацию",
+               callback_data=ItemCallback.from_model(data, "info").pack()
+          )
+     )
+     keyboard.adjust(2, 1)
+     
+     if mode == PageMode.ALL:
+          keyboard.add(
+               InlineKeyboardButton(
+                    text="<",
+                    callback_data=PaginatorCallback(
+                         limit=limit, 
+                         offset=offset, 
+                         paginate_mode="left",
+                         data_len=data_len
+                    ).pack()
+               ),
+               InlineKeyboardButton(
+                    text=">",
+                    callback_data=PaginatorCallback(
+                         limit=limit,
+                         offset=offset,
+                         paginate_mode="right",
+                         data_len=data_len
+                    ).pack()
+               ),
+               InlineKeyboardButton(
+                    text=f"{offset + 1}/{data_len}",
+                    callback_data="empty"
+               )
+          )
+          keyboard.adjust(2, 1, 2, 1)
+     return keyboard.as_markup()
