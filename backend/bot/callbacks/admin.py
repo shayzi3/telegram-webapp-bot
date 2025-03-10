@@ -10,6 +10,7 @@ from bot.utils.inline_buttons import item_page_builder
 from bot.utils.enums import PageMode
 from bot.utils.filters.callback import ItemCallback, PaginatorCallback
 from bot.utils.inline_buttons import delete_message
+from bot.handlers.common.admin.service import AdminService
 from schemas import ItemModel
 
 
@@ -31,8 +32,7 @@ async def change_item(query: CallbackQuery, callback_data: ItemCallback) -> None
      
 @admin_callback_router.callback_query(ItemCallback.filter(F.filter_mode == "info"))
 async def info_item(query: CallbackQuery, callback_data: ItemCallback) -> None:
-     await query.message.answer(callback_data.to_info, reply_markup=delete_message)
-     await query.answer()
+     ...
      
      
 
@@ -103,6 +103,28 @@ async def right_button(
           media=InputMediaPhoto(media=item.image),
           reply_markup=markup
      )
+     
+     
+@admin_callback_router.callback_query(PaginatorCallback.filter(F.paginate_mode == "count"))
+@inject
+async def count_button(
+     query: CallbackQuery,
+     callback_data: PaginatorCallback,
+     session: FromDishka[AsyncSession],
+     service: FromDishka[AdminService]
+) -> None:
+     markup, image = await service.get_items(
+          session=session,
+          item="all"
+     )
+     try:
+          await query.message.edit_media(
+               media=InputMediaPhoto(media=image),
+               reply_markup=markup
+          )
+     except Exception as _:
+          await query.answer("Обновление не найдено")
+     
      
      
      

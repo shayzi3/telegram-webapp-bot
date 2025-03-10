@@ -7,8 +7,6 @@ from schemas import UserModel
 
 
 class UserService:
-     def __init__(self, user_repository: UserRepository):
-          self.user_repository = user_repository
      
      
      async def start(
@@ -19,13 +17,13 @@ class UserService:
      ) -> str:
           user = await UserModel.get_from_redis(f"user:{id}")
           if user is None:
-               user = await self.user_repository.read(
+               user = await UserRepository.read(
                     id=id,
                     write_in_redis=True,
                     session=session
                )
                if user is None:
-                    await self.user_repository.create(
+                    await UserRepository.create(
                          id=id,
                          name=name,
                          session=session
@@ -34,6 +32,4 @@ class UserService:
                
                
 async def get_user_service() -> UserService:
-     return UserService(
-          user_repository=UserRepository
-     )
+     return UserService()

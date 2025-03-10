@@ -40,8 +40,14 @@ async def skip(message: Message, state: FSMContext) -> None:
      await message.answer("Событий не найдено")
      
      
-# User commands: /basket, /buy
+@user_router.message(Command("basket"))
+async def basket(message: Message) -> None:
+     ...
      
+     
+@user_router.message(Command("buy"))
+async def buy(message: Message) -> None:
+     ...     
      
           
      

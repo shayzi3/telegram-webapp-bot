@@ -15,6 +15,10 @@ class TimeoutMiddleware(BaseMiddleware):
      users = {}
      
      
+     def __init__(self, rate_limit: int = 1):
+          self.rate_limit = rate_limit
+     
+     
      async def __call__(
           self, 
           handler: Callable[[Message, dict[str, Any]], Awaitable[Any]], 
@@ -22,13 +26,13 @@ class TimeoutMiddleware(BaseMiddleware):
           data: dict[str, Any]
      ) -> None:
           if event.from_user.id not in self.users:
-               self.users[event.from_user.id] = datetime.utcnow() + timedelta(seconds=1)
+               self.users[event.from_user.id] = datetime.utcnow() + timedelta(seconds=self.rate_limit)
                return await handler(event, data)
                
           if self.users[event.from_user.id] > datetime.utcnow():
                return await event.answer("Ограничение отправки команды в 1 секунду!")
           
-          self.users[event.from_user.id] = datetime.utcnow() + timedelta(seconds=1)
+          self.users[event.from_user.id] = datetime.utcnow() + timedelta(seconds=self.rate_limit)
           return await handler(event, data)
      
      
@@ -56,3 +60,14 @@ class IsAdminMiddleware(BaseMiddleware):
           if user.is_admin is False:
                return await event.answer("Вы не администратор!")
           return await handler(event, data)
+     
+     
+class LogMiddleware(BaseMiddleware):
+     
+     async def __call__(
+          self, 
+          handler: Callable[[Message, dict[str, Any]], Awaitable[Any]], 
+          event: Message, 
+          data: dict[str, Any]
+     ) -> None:
+          ...

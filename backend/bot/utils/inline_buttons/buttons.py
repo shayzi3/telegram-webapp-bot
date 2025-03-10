@@ -55,15 +55,15 @@ def item_page_builder(
      keyboard.add(
           InlineKeyboardButton(
                text="Удалить",
-               callback_data=ItemCallback.from_model(data, "delete").pack()
+               callback_data=ItemCallback(id=data.id, filter_mode="delete").pack()
           ),
           InlineKeyboardButton(
                text="Изменить",
-               callback_data=ItemCallback.from_model(data, "change").pack()
+               callback_data=ItemCallback(id=data.id, filter_mode="change").pack()
           ),
           InlineKeyboardButton(
                text="Просмотреть информацию",
-               callback_data=ItemCallback.from_model(data, "info").pack()
+               callback_data=ItemCallback(id=data.id, filter_mode="info").pack()
           )
      )
      keyboard.adjust(2, 1)
@@ -90,7 +90,12 @@ def item_page_builder(
                ),
                InlineKeyboardButton(
                     text=f"{offset + 1}/{data_len}",
-                    callback_data="empty"
+                    callback_data=PaginatorCallback(
+                         limit=limit,
+                         offset=offset,
+                         paginate_mode="count",
+                         data_len=data_len
+                    ).pack()
                )
           )
           keyboard.adjust(2, 1, 2, 1)

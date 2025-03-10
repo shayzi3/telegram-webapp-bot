@@ -1,5 +1,5 @@
 from random import choice
-from string import ascii_letters, digits
+from string import digits
 from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram.types import InlineKeyboardMarkup
@@ -12,20 +12,11 @@ from schemas import UserModel, ItemModel
 
 
 class AdminService:
-     
-     def __init__(
-          self, 
-          user_repository: UserRepository,
-          item_repository: ItemRepository
-     ) -> None:
-          self.user_repository = user_repository
-          self.item_repository = item_repository
           
      
      @property
      def id_for_item(self) -> str:
-          symbols = ascii_letters + digits
-          return "".join([choice(symbols) for _ in range(20)])
+          return "".join([choice(digits) for _ in range(5)])
           
      
      async def new_item(
@@ -39,7 +30,7 @@ class AdminService:
                return "URL недействителен! Отправьте повторно", False
           
           data["id"] = self.id_for_item
-          await self.item_repository.create(
+          await ItemRepository.create(
                session=session,
                **data
           )
@@ -53,7 +44,7 @@ class AdminService:
      ) -> str:
           user = await UserModel.get_from_redis(f"user:{new_admin_id}")
           if user is None:
-               user = await self.user_repository.read(
+               user = await UserRepository.read(
                     session=session,
                     write_in_redis=True,
                     id=new_admin_id
@@ -65,7 +56,7 @@ class AdminService:
                return "Пользователь уже является администратором!"
 
           
-          await self.user_repository.update(
+          await UserRepository.update(
                session=session,
                where=user.where,
                delete_redis_values=[user.redis_key],
@@ -79,9 +70,9 @@ class AdminService:
           session: AsyncSession,
           item_id: str
      ) -> str:
-          item = ItemModel.get_from_redis(f"item:{item_id}")
+          item = await ItemModel.get_from_redis(f"item:{item_id}")
           if item is None:
-               item = await self.item_repository.read(
+               item = await ItemRepository.read(
                     session=session,
                     write_in_redis=True,
                     id=item_id
@@ -89,7 +80,7 @@ class AdminService:
           if item is None:
                return "Такого предмета не существует!"
           
-          await self.item_repository.delete(
+          await ItemRepository.delete(
                session=session,
                where=item.where,
                delete_redis_values=[item.redis_key]
@@ -106,10 +97,11 @@ class AdminService:
           if item == "all":
                mode = PageMode.ALL
                
+          item_len = 0
           if mode == PageMode.ONE:
                get_item = await ItemModel.get_from_redis(f"item:{item}")
                if get_item is None:
-                    get_item = await self.item_repository.read(
+                    get_item = await ItemRepository.read(
                          session=session,
                          write_in_redis=True,
                          id=item
@@ -118,13 +110,13 @@ class AdminService:
           elif mode == PageMode.ALL:
                get_item = await ItemModel.get_from_redis(f"item:off={0}lim={1}")
                if get_item is None:
-                    get_item = await self.item_repository.limit_item(
+                    get_item = await ItemRepository.limit_item(
                          session=session,
                          write_in_redis=True,
                          offset=0,
                          limit=1,
                     )
-               item_len = await self.item_repository.get_count_items(
+               item_len = await ItemRepository.get_count_items(
                     session=session
                )
                
@@ -143,7 +135,4 @@ class AdminService:
 
 
 async def get_admin_service() -> AdminService:
-     return AdminService(
-          user_repository=UserRepository,
-          item_repository=ItemRepository
-     )
+     return AdminService()

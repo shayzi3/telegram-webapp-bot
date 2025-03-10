@@ -44,13 +44,15 @@ class Repository(Generic[Model], AbstractRepository):
      @classmethod
      async def create(cls, session: AsyncSession, **extras) -> None:
           """extras - values"""
+          logger.debug(f"INSERT data in {cls.model.__tablename__}: {extras}")
+          
           sttm = (
                insert(cls.model).
                values(**extras)
           )
           await session.execute(sttm)
           await session.commit()        
-          logger.debug(f"INSERT data in {cls.model.__tablename__}: {extras}")
+          
           
           
      @classmethod
@@ -89,12 +91,13 @@ class Repository(Generic[Model], AbstractRepository):
           **extras
      ) -> None:
           """extras - values while need update"""
+          logger.debug(f"UPDATE data in {cls.model.__tablename__} WHERE {where} VALUES {extras}")
+          
           sttm = (
                update(cls.model).filter_by(**where).values(**extras).returning(cls.model.id)
           )
           await session.execute(sttm)
           await session.commit()
-          logger.debug(f"UPDATE data in {cls.model.__tablename__} WHERE {where} VALUES {extras}")
           
           if delete_redis_values:
                await RedisManager.delete_from_redis(*delete_redis_values)
@@ -108,12 +111,13 @@ class Repository(Generic[Model], AbstractRepository):
           where: dict[str, Any],
           delete_redis_values: list[str] = []
      ) -> None:
+          logger.debug(f"DELETE data in {cls.model.__tablename__} WHERE {where}")
+          
           sttm = (
                delete(cls.model).filter_by(**where)
           )
           await session.execute(sttm)
           await session.commit()
-          logger.debug(f"DELETE data in {cls.model.__tablename__} WHERE {where}")
           
           if delete_redis_values:
                await RedisManager.delete_from_redis(*delete_redis_values)

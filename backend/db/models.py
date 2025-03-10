@@ -24,8 +24,8 @@ class Base(AsyncAttrs, DeclarativeBase, Generic[M]):
 association_table = Table(
     "association_table",
     Base.metadata,
-    Column("users", ForeignKey("users.id"), primary_key=True),
-    Column("items", ForeignKey("items.id"), primary_key=True),
+    Column("users", ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True),
+    Column("items", ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True),
 )
 
 
@@ -42,7 +42,8 @@ class User(Base[UserModel]):
      basket: Mapped[List["Item"]] = relationship(
           back_populates="users", 
           lazy="joined",
-          secondary=association_table
+          secondary=association_table,
+          cascade="all, delete"
      )
 
      
@@ -61,5 +62,6 @@ class Item(Base[ItemModel]):
      users: Mapped[List["User"]] = relationship(
           back_populates="basket", 
           lazy="joined",
-          secondary=association_table
+          secondary=association_table,
+          passive_deletes=True
      ) 

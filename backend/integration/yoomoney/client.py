@@ -1,8 +1,8 @@
 from typing import Any
-from aiogram import Bot
+from loguru import logger
 from aiogram.types import Message
 from httpx import AsyncClient
-from loguru import logger
+from aiogram import Bot
 
 from bot.utils.inline_buttons import url_button_builder
 from .schema import YoomoneyResponse, PaymentType
@@ -12,7 +12,7 @@ from core import settings
 
 class YoomoneyManager:
      
-     async def payment_link(
+     async def _payment_link(
           self,
           payment_type: PaymentType,
           money: int,
@@ -22,12 +22,11 @@ class YoomoneyManager:
           payment_type:
                PC — оплата из кошелька ЮMoney
                AC — с банковской карты
+               
+          money > 1
+          label <= 64
           """
-          if money <= 1:
-               raise ValueError("money more than 1")
-          
-          if len(label) > 64:
-               raise ValueError("label less or equal 64")
+          logger.info(f"GENERATE PAYMENT LINK. LABEL: {label}")
           
           body = {
                "receiver": settings.yoomoney_receiver,
@@ -42,8 +41,6 @@ class YoomoneyManager:
           
           async with AsyncClient() as client:
                response = await client.post(url)
-               
-          logger.info(f"GENERATE PAYMENT LINK. LABEL: {label}")
           return response.text.split()[-1] # returns redirect url for pay
      
      
@@ -55,7 +52,7 @@ class YoomoneyManager:
           money: int,
           label: str
      ) -> None:
-          link = await self.payment_link(payment_type, money, label)
+          link = await self._payment_link(payment_type, money, label)
           await bot_message.delete() # Удаляю сообщение `Ссылка генерируется...`
           
           await user_message.answer(

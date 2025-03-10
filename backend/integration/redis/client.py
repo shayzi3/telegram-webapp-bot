@@ -74,5 +74,5 @@ class RedisManager(Generic[M]):
                await session.set(
                     name=f"item:off={offset}lim={limit}",
                     value=self.to_redis(),
-                    ex=self.__redis_expire__
+                    ex=self.__offset_redis_expire__
                )
