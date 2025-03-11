@@ -131,6 +131,19 @@ class AdminService:
                data_len=item_len
           )
           return page_build, get_item.image
+     
+     
+     async def admins(
+          session: AsyncSession
+     ) -> None:
+          ...
+          
+          
+     async def new_item_doc(
+          session: AsyncSession,
+          document: bytes
+     ) -> None:
+          ...
           
 
 

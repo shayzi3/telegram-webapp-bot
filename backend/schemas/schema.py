@@ -72,3 +72,8 @@ class ItemModel(BaseModel, RedisManager["ItemModel"]):
      @property
      def where(self) -> str:
           return {"id": self.id}
+     
+     
+     @property
+     def item_info(self) -> str:
+          return f"ID: {self.id} \nNAME: {self.name} \nDESCRIPTION: {self.description} \nPRICE: {self.price}"

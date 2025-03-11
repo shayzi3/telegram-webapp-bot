@@ -21,7 +21,7 @@ async def aiogram_webhook(request: Request) -> Response:
 async def yoomoney_webhook(request: Request) -> Response:
      data = await request.body()
      split_data = data.decode().split("&")
-     
+
      kwargs = {}
      for arg in split_data:
           name = arg.split("=")

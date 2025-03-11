@@ -12,6 +12,7 @@ from bot.utils.filters.callback import ItemCallback, PaginatorCallback
 from bot.utils.inline_buttons import delete_message
 from bot.handlers.common.admin.service import AdminService
 from schemas import ItemModel
+from .service import CallbackAdminService
 
 
 admin_callback_router = Router(name="admin_callback_router")
@@ -31,8 +32,19 @@ async def change_item(query: CallbackQuery, callback_data: ItemCallback) -> None
      
      
 @admin_callback_router.callback_query(ItemCallback.filter(F.filter_mode == "info"))
-async def info_item(query: CallbackQuery, callback_data: ItemCallback) -> None:
-     ...
+@inject
+async def info_item(
+     query: CallbackQuery, 
+     callback_data: ItemCallback,
+     session: FromDishka[AsyncSession],
+     service: FromDishka[CallbackAdminService]
+) -> None:
+     result = await service.info_item(
+          session=session,
+          item_callback=callback_data
+     )
+     await query.message.answer(result, reply_markup=delete_message)
+     await query.answer()
      
      
 
@@ -41,32 +53,22 @@ async def info_item(query: CallbackQuery, callback_data: ItemCallback) -> None:
 async def left_button(
      query: CallbackQuery, 
      callback_data: PaginatorCallback,
-     session: FromDishka[AsyncSession]
+     session: FromDishka[AsyncSession],
+     service: FromDishka[CallbackAdminService]
 ) -> None:
      if callback_data.offset <= 0:
           return await query.answer("Листать дальше нельзя!")
      
-     item = await ItemModel.get_from_redis(f"item:off={callback_data.offset - 1}lim={callback_data.limit}")
-     if item is None:
-          item = await ItemRepository.limit_item(
-               session=session,
-               write_in_redis=True,
-               offset=callback_data.offset - 1,
-               limit=1
-          )
-     if item is None:
-          return await query.answer("Дальше листать нельзя! Кончились предметы.")
-     
-     markup = item_page_builder(
-          data=item,
-          mode=PageMode.ALL,
-          data_len=callback_data.data_len,
-          offset=callback_data.offset - 1,
-          limit=1
+     result = await service.left_button(
+          session=session,
+          callback=callback_data
      )
+     if isinstance(result, str):
+          return await query.answer(result)
+     
      await query.message.edit_media(
-          media=InputMediaPhoto(media=item.image),
-          reply_markup=markup
+          media=InputMediaPhoto(media=result[1]),
+          reply_markup=result[0]
      )
      
      
@@ -76,32 +78,22 @@ async def left_button(
 async def right_button(
      query: CallbackQuery, 
      callback_data: PaginatorCallback,
-     session: FromDishka[AsyncSession]
+     session: FromDishka[AsyncSession],
+     service: FromDishka[CallbackAdminService]
 ) -> None:
      if callback_data.offset + 1 >= callback_data.data_len:
           return await query.answer("Листать дальше нельзя!")
      
-     item = await ItemModel.get_from_redis(f"item:off={callback_data.offset + 1}lim={callback_data.limit}")
-     if item is None:
-          item = await ItemRepository.limit_item(
-               session=session,
-               write_in_redis=True,
-               offset=callback_data.offset + 1,
-               limit=1
-          )
-     if item is None:
-          return await query.answer("Дальше листать нельзя! Кончились предметы.")
-     
-     markup = item_page_builder(
-          data=item,
-          mode=PageMode.ALL,
-          data_len=callback_data.data_len,
-          offset=callback_data.offset + 1,
-          limit=1
+     result = await service.right_button(
+          session=session,
+          callback=callback_data
      )
+     if isinstance(result, str):
+          return await query.answer(result)
+     
      await query.message.edit_media(
-          media=InputMediaPhoto(media=item.image),
-          reply_markup=markup
+          media=InputMediaPhoto(media=result[1]),
+          reply_markup=result[0]
      )
      
      
@@ -117,13 +109,14 @@ async def count_button(
           session=session,
           item="all"
      )
-     try:
-          await query.message.edit_media(
-               media=InputMediaPhoto(media=image),
-               reply_markup=markup
-          )
-     except Exception as _:
-          await query.answer("Обновление не найдено")
+     count_button = markup.inline_keyboard[-1][0] # Inline button with text count pages. 1/5
+     if count_button.text.split("/")[-1] == str(callback_data.data_len): # 5 == data_len
+          return await query.answer("Обновление предметов не найдено") # Если нового предемета в базу не добавлено
+     
+     await query.message.edit_media(
+          media=InputMediaPhoto(media=image),
+          reply_markup=markup
+     )
      
      
      
