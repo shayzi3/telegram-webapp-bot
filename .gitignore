@@ -2,6 +2,4 @@
 test.py
 test_flet.py
 __pycache__
-migrations/
-alembic.ini
 venv/

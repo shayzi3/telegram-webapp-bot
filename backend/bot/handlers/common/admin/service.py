@@ -7,7 +7,6 @@ from aiogram.types import InlineKeyboardMarkup
 from bot.utils.enums import PageMode
 from bot.utils.inline_buttons import item_page_builder
 from db.sql.repository import UserRepository, ItemRepository
-from schemas import UserModel, ItemModel
 from .schema import ValidateUrl
 
 
@@ -43,13 +42,12 @@ class AdminService:
           session: AsyncSession, 
           new_admin_id: str
      ) -> str:
-          user = await UserModel.get_from_redis(f"user:{new_admin_id}")
-          if user is None:
-               user = await UserRepository.read(
-                    session=session,
-                    write_in_redis=True,
-                    id=new_admin_id
-               )
+          user = await UserRepository.read(
+               session=session,
+               write_in_redis=True,
+               redis_get_value=f"user:{new_admin_id}",
+               id=new_admin_id
+          )
           if user is None:
                return "Такого пользователя не существует!"
           
@@ -71,13 +69,12 @@ class AdminService:
           session: AsyncSession,
           item_id: str
      ) -> str:
-          item = await ItemModel.get_from_redis(f"item:{item_id}")
-          if item is None:
-               item = await ItemRepository.read(
-                    session=session,
-                    write_in_redis=True,
-                    id=item_id
-               )
+          item = await ItemRepository.read(
+               session=session,
+               write_in_redis=True,
+               redis_get_value=f"item:{item_id}",
+               id=item_id
+          )
           if item is None:
                return "Такого предмета не существует!"
           
@@ -100,23 +97,21 @@ class AdminService:
                
           item_len = 0
           if mode == PageMode.ONE:
-               get_item = await ItemModel.get_from_redis(f"item:{item}")
-               if get_item is None:
-                    get_item = await ItemRepository.read(
-                         session=session,
-                         write_in_redis=True,
-                         id=item
-                    )
+               get_item = await ItemRepository.read(
+                    session=session,
+                    write_in_redis=True,
+                    redis_get_value=f"item:{item}",
+                    id=item
+               )
                     
           elif mode == PageMode.ALL:
-               get_item = await ItemModel.get_from_redis(f"item:off={0}lim={1}")
-               if get_item is None:
-                    get_item = await ItemRepository.limit_item(
-                         session=session,
-                         write_in_redis=True,
-                         offset=0,
-                         limit=1,
-                    )
+               get_item = await ItemRepository.limit_item(
+                    session=session,
+                    write_in_redis=True,
+                    redis_get_value=f"item:off={0}lim={1}",
+                    offset=0,
+                    limit=1
+               )
                item_len = await ItemRepository.get_count_items(
                     session=session
                )

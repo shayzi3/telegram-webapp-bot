@@ -60,12 +60,18 @@ class Repository(Generic[Model], AbstractRepository):
           cls, 
           session: AsyncSession, 
           write_in_redis: bool = True,
+          redis_get_value: Optional[str] = None,
           *args,
           **extras
      ) -> Optional[Model | list[Any]]:
           """extras - where value"""
-          logger.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
+          pydantic_model = cls.model.__pydantic_model__
+          if redis_get_value is not None:
+               value = await pydantic_model.get_from_redis(redis_get_value)
+               if value is not None:
+                    return value
           
+          logger.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
           sttm = select(cls.model).filter_by(**extras)
           result = await session.execute(sttm)
           scalar = result.scalar()
@@ -76,10 +82,10 @@ class Repository(Generic[Model], AbstractRepository):
           if args:
                return [scalar.__dict__.get(arg) for arg in args]
           
-          model = cls.model.__pydantic_model__(**scalar.__dict__)
+          to_model = pydantic_model(**scalar.__dict__)
           if write_in_redis is True:
-               await model.write_in_redis()
-          return model
+               await to_model.write_in_redis()
+          return to_model
           
           
      @classmethod

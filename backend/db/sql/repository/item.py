@@ -32,10 +32,16 @@ class ItemRepository(Repository[ItemModel]):
           session: AsyncSession,
           offset: int,
           limit: int,
-          write_in_redis: bool = True
+          write_in_redis: bool = True,
+          redis_get_value: Optional[str] = None
      ) -> Optional[ItemModel]:
-          logger.info(f"SELECT DATA FROM items offset: {offset}; limit: {limit}")
+          pydantic_model = cls.model.__pydantic_model__
+          if redis_get_value is not None:
+               value = await pydantic_model.get_from_redis(redis_get_value)
+               if value is not None:
+                    return value
           
+          logger.info(f"SELECT DATA FROM items offset: {offset}; limit: {limit}")
           sttm = select(cls.model).offset(offset).limit(limit)
           response = await session.execute(sttm)
           scalar = response.scalar()
@@ -43,7 +49,7 @@ class ItemRepository(Repository[ItemModel]):
           if scalar is None:
                return None
           
-          model = cls.model.__pydantic_model__(**scalar.__dict__)
+          to_model = pydantic_model(**scalar.__dict__)
           if write_in_redis is True:
-               await model.offset_write(offset=offset, limit=limit)
-          return model
+               await to_model.offset_write(offset=offset, limit=limit)
+          return to_model

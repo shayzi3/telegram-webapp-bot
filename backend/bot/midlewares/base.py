@@ -5,7 +5,6 @@ from aiogram.dispatcher.middlewares.base import BaseMiddleware
 
 from db.sql.session import get_async_session
 from db.sql.repository import UserRepository
-from schemas import UserModel
 from core import settings
 
 
@@ -47,16 +46,13 @@ class IsAdminMiddleware(BaseMiddleware):
           if event.from_user.id in settings.admins:
                return await handler(event, data)
           
-          user = await UserModel.get_from_redis(f"user:{event.from_user.id}")
-          if user is None:
-               session = await get_async_session()
-               
-               user = await UserRepository.read(
-                    session=session,
-                    write_in_redis=True,
-                    id=event.from_user.id
-               )
-               
+          session = await get_async_session()
+          user = await UserRepository.read(
+               session=session,
+               write_in_redis=True,
+               redis_get_value=f"user:{event.from_user.id}",
+               id=event.from_user.id
+          )
           if user.is_admin is False:
                return await event.answer("Вы не администратор!")
           return await handler(event, data)

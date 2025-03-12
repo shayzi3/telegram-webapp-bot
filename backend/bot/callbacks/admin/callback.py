@@ -39,7 +39,7 @@ async def info_item(
 ) -> None:
      result = await service.info_item(
           session=session,
-          item_callback=callback_data
+          callback=callback_data
      )
      await query.message.answer(result, reply_markup=delete_message)
      await query.answer()

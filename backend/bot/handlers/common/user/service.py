@@ -14,19 +14,18 @@ class UserService:
           name: str,
           session: AsyncSession
      ) -> str:
-          user = await UserModel.get_from_redis(f"user:{id}")
+          user = await UserRepository.read(
+               id=id,
+               write_in_redis=True,
+               redis_get_value=f"user:{id}",
+               session=session
+          )
           if user is None:
-               user = await UserRepository.read(
+               await UserRepository.create(
                     id=id,
-                    write_in_redis=True,
+                    name=name,
                     session=session
                )
-               if user is None:
-                    await UserRepository.create(
-                         id=id,
-                         name=name,
-                         session=session
-                    )
           return "Совершай покупки в WebApp приложении!"
                
                

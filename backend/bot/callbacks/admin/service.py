@@ -6,7 +6,6 @@ from bot.utils.filters.callback import PaginatorCallback, ItemCallback
 from bot.utils.inline_buttons import item_page_builder
 from bot.utils.enums import PageMode
 from db.sql.repository import ItemRepository
-from schemas import ItemModel
 
 
 
@@ -16,15 +15,14 @@ class CallbackAdminService:
      async def info_item(
           self,
           session: AsyncSession,
-          item_callback:ItemCallback
+          callback:ItemCallback
      ) -> str:
-          item = await ItemModel.get_from_redis(item_callback.redis_key)
-          if item is None:
-               item = await ItemRepository.read(
-                    session=session,
-                    write_in_redis=True,
-                    id=item_callback.id
-               )
+          item = await ItemRepository.read(
+               session=session,
+               write_in_redis=True,
+               redis_get_value=callback.redis_key,
+               id=callback.id
+          )
           if item is None:
                return "Предмет не найден!"
           return item.item_info
@@ -53,14 +51,13 @@ class CallbackAdminService:
           session: AsyncSession,
           callback: PaginatorCallback
      ) -> str | tuple[InlineKeyboardMarkup, str]:
-          item = await ItemModel.get_from_redis(callback.redis_key_left)
-          if item is None:
-               item = await ItemRepository.limit_item(
-                    session=session,
-                    write_in_redis=True,
-                    offset=callback.offset - 1,
-                    limit=1
-               )
+          item = await ItemRepository.limit_item(
+               session=session,
+               write_in_redis=True,
+               offset=callback.offset - 1,
+               redis_get_value=callback.redis_key_left,
+               limit=1
+          )
           if item is None:
                return "Дальше листать нельзя! Кончились предметы."
           
@@ -79,14 +76,13 @@ class CallbackAdminService:
           session: AsyncSession,
           callback: PaginatorCallback
      ) -> str | tuple[InlineKeyboardMarkup, str]:
-          item = await ItemModel.get_from_redis(callback.redis_key_right)
-          if item is None:
-               item = await ItemRepository.limit_item(
-                    session=session,
-                    write_in_redis=True,
-                    offset=callback.offset + 1,
-                    limit=1
-               )
+          item = await ItemRepository.limit_item(
+               session=session,
+               write_in_redis=True,
+               offset=callback.offset + 1,
+               redis_get_value=callback.redis_key_right,
+               limit=1
+          )
           if item is None:
                return "Дальше листать нельзя! Кончились предметы."
           
