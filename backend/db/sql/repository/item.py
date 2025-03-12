@@ -1,10 +1,11 @@
+from typing import Optional
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from .repository import Repository
+from db.sql.models import Item
 from schemas import ItemModel
-from db.models import Item
+from .repository import Repository
 
 
 class ItemRepository(Repository[ItemModel]):
@@ -32,7 +33,7 @@ class ItemRepository(Repository[ItemModel]):
           offset: int,
           limit: int,
           write_in_redis: bool = True
-     ) -> ItemModel | None:
+     ) -> Optional[ItemModel]:
           logger.info(f"SELECT DATA FROM items offset: {offset}; limit: {limit}")
           
           sttm = select(cls.model).offset(offset).limit(limit)

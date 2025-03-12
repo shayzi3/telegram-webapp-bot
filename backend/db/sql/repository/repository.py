@@ -1,10 +1,10 @@
-from typing import Any, Generic, TypeVar
-from loguru import logger
-
+from typing import Any, Generic, TypeVar, Optional
 from abc import ABC, abstractmethod
+from loguru import logger
 from sqlalchemy import insert, select, update, delete
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from integration.redis import RedisManager
+from db.redis import RedisManager
 
 
 
@@ -22,7 +22,7 @@ class AbstractRepository(ABC):
           
           
      @abstractmethod
-     async def read(self, session, **extras) -> Model | None:
+     async def read(self, session, **extras) -> Optional[Model]:
           ...
           
           
@@ -62,7 +62,7 @@ class Repository(Generic[Model], AbstractRepository):
           write_in_redis: bool = True,
           *args,
           **extras
-     ) -> Model | list[Any] | None:
+     ) -> Optional[Model | list[Any]]:
           """extras - where value"""
           logger.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
           

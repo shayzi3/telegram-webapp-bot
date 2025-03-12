@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bot.handlers.common.user.service import UserService, get_user_service
 from bot.handlers.common.admin.service import AdminService, get_admin_service
 from bot.callbacks.admin.service import CallbackAdminService, get_callback_admin_service
-from db.session import Session
+from db.sql.session import Session
 
 
 

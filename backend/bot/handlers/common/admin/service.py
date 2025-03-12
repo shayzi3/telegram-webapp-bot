@@ -6,9 +6,10 @@ from aiogram.types import InlineKeyboardMarkup
 
 from bot.utils.enums import PageMode
 from bot.utils.inline_buttons import item_page_builder
-from db.repository import UserRepository, ItemRepository
-from .schema import ValidateUrl
+from db.sql.repository import UserRepository, ItemRepository
 from schemas import UserModel, ItemModel
+from .schema import ValidateUrl
+
 
 
 class AdminService:

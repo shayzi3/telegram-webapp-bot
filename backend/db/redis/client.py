@@ -1,5 +1,6 @@
 import json
 
+from typing import Optional
 from loguru import logger
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Generic, TypeVar
@@ -38,7 +39,7 @@ class RedisManager(Generic[M]):
      
      
      @classmethod
-     async def get_from_redis(cls, key: str) -> M | None:
+     async def get_from_redis(cls, key: str) -> Optional[M]:
           logger.info(f"GET VALUE FROM REDIS {key}")
           
           async with get_redis_session() as redis:

@@ -9,4 +9,3 @@ callback_router = Router(name="callback_router")
 @callback_router.callback_query(F.data == "msg_delete")
 async def message_delete(query: CallbackQuery) -> None:
      await query.message.delete()
-     await query.answer()

@@ -2,10 +2,9 @@ from typing import Any, Callable, Awaitable
 from datetime import datetime, timedelta
 from aiogram.types import Message
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.repository import UserRepository
-from bot.provider import container
+from db.sql.session import get_async_session
+from db.sql.repository import UserRepository
 from schemas import UserModel
 from core import settings
 
@@ -50,7 +49,8 @@ class IsAdminMiddleware(BaseMiddleware):
           
           user = await UserModel.get_from_redis(f"user:{event.from_user.id}")
           if user is None:
-               session = await container.get(AsyncSession)
+               session = await get_async_session()
+               
                user = await UserRepository.read(
                     session=session,
                     write_in_redis=True,

@@ -1,14 +1,16 @@
+from typing import Optional
 from aiogram import Router, F
 from aiogram.filters.command import Command, CommandObject
 from aiogram.types import Message
+from aiogram.methods import SendMessage
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from dishka.integrations.aiogram import inject
 from dishka import FromDishka
 
-from .service import AdminService
 from bot.utils.states import NewItemState, NewItemDocState
 from bot.midlewares import IsAdminMiddleware
+from .service import AdminService
 
 
 admin_router = Router(name="admin_router")
@@ -96,7 +98,7 @@ async def delete_item(
      command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-) -> None:
+) -> Optional[SendMessage]:
      if command.args is None:
           return await message.answer("Пример использования: /delete_item item_id")
      
@@ -115,7 +117,7 @@ async def get_items(
      command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-) -> None:
+) -> Optional[SendMessage]:
      if command.args is None:
           return await message.answer("Пример использования: /get_item item_id или /get_item all")
      
@@ -140,7 +142,7 @@ async def new_admin(
      command: CommandObject,
      session: FromDishka[AsyncSession],
      service: FromDishka[AdminService],
-) -> None:
+) -> Optional[SendMessage]:
      if command.args is None:
           return await message.answer("Использование команды: /new_admin user_id")
      

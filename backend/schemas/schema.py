@@ -3,7 +3,7 @@ import json
 from pydantic import BaseModel, field_validator
 from datetime import datetime
 
-from integration.redis import RedisManager
+from db.redis import RedisManager
 
 
 

@@ -1,17 +1,15 @@
+from typing import Optional
 from aiogram.types.callback_query import CallbackQuery
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.methods import AnswerCallbackQuery
 from aiogram.types import InputMediaPhoto
 from aiogram import F, Router
 from sqlalchemy.ext.asyncio import AsyncSession
 from dishka.integrations.aiogram import inject
 from dishka import FromDishka
 
-from db.repository import ItemRepository
-from bot.utils.inline_buttons import item_page_builder
-from bot.utils.enums import PageMode
 from bot.utils.filters.callback import ItemCallback, PaginatorCallback
 from bot.utils.inline_buttons import delete_message
-from bot.handlers.common.admin.service import AdminService
-from schemas import ItemModel
 from .service import CallbackAdminService
 
 
@@ -55,7 +53,7 @@ async def left_button(
      callback_data: PaginatorCallback,
      session: FromDishka[AsyncSession],
      service: FromDishka[CallbackAdminService]
-) -> None:
+) -> Optional[AnswerCallbackQuery]:
      if callback_data.offset <= 0:
           return await query.answer("Листать дальше нельзя!")
      
@@ -80,7 +78,7 @@ async def right_button(
      callback_data: PaginatorCallback,
      session: FromDishka[AsyncSession],
      service: FromDishka[CallbackAdminService]
-) -> None:
+) -> Optional[AnswerCallbackQuery]:
      if callback_data.offset + 1 >= callback_data.data_len:
           return await query.answer("Листать дальше нельзя!")
      
@@ -103,21 +101,19 @@ async def count_button(
      query: CallbackQuery,
      callback_data: PaginatorCallback,
      session: FromDishka[AsyncSession],
-     service: FromDishka[AdminService]
-) -> None:
-     markup, image = await service.get_items(
+     service: FromDishka[CallbackAdminService]
+) -> Optional[AnswerCallbackQuery]:
+     result = await service.count_button(
           session=session,
-          item="all"
+          callback=callback_data
      )
-     count_button = markup.inline_keyboard[-1][0] # Inline button with text count pages. 1/5
-     if count_button.text.split("/")[-1] == str(callback_data.data_len): # 5 == data_len
-          return await query.answer("Обновление предметов не найдено") # Если нового предемета в базу не добавлено
+     if isinstance(result, str):
+          return await query.answer(result)
      
-     await query.message.edit_media(
-          media=InputMediaPhoto(media=image),
-          reply_markup=markup
-     )
-     
-     
-     
-     
+     try:
+          await query.message.edit_media(
+               reply_markup=result[0],
+               media=InputMediaPhoto(media=result[1])
+          )
+     except TelegramBadRequest:
+          await query.answer("Произошла ошибка попробуйте позже!")

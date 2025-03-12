@@ -1,4 +1,6 @@
+from typing import Optional
 from aiogram.types import Message
+from aiogram.methods import SendMessage
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram import Router
@@ -32,7 +34,7 @@ async def start(
      
      
 @user_router.message(Command("skip"))
-async def skip(message: Message, state: FSMContext) -> None:
+async def skip(message: Message, state: FSMContext) -> Optional[SendMessage]:
      active_state = await state.get_state()
      if active_state:
           await state.clear()

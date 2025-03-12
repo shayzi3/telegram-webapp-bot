@@ -1,4 +1,3 @@
-from typing import Any
 from loguru import logger
 from aiogram.types import Message
 from httpx import AsyncClient
@@ -53,7 +52,7 @@ class YoomoneyManager:
           label: str
      ) -> None:
           link = await self._payment_link(payment_type, money, label)
-          await bot_message.delete() # Удаляю сообщение `Ссылка генерируется...`
+          await bot_message.delete() # Delete message `Ссылка генерируется...`
           
           await user_message.answer(
                text=f"Твоя ссылка для оплаты.",
@@ -61,10 +60,10 @@ class YoomoneyManager:
           )
           
           
-     async def on_success(self, response: YoomoneyResponse, bot: Bot) -> Any:
+     async def on_success(self, response: YoomoneyResponse, bot: Bot) -> None:
           logger.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id} LABEL: {response.label}")
           
-          return await bot.send_message(
+          await bot.send_message(
                chat_id=int(response.label),
                text=f"{response.withdraw_amount} отправлены успешно! \nOperation: {response.operation_label}"
           )

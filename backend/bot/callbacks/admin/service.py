@@ -1,12 +1,11 @@
-
 from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
+from bot.handlers.common.admin.service import get_admin_service
 from bot.utils.filters.callback import PaginatorCallback, ItemCallback
 from bot.utils.inline_buttons import item_page_builder
 from bot.utils.enums import PageMode
-from db.repository import ItemRepository
+from db.sql.repository import ItemRepository
 from schemas import ItemModel
 
 
@@ -99,6 +98,23 @@ class CallbackAdminService:
                limit=1
           )
           return markup, item.image
+     
+     
+     async def count_button(
+          self,
+          session: AsyncSession,
+          callback: PaginatorCallback
+     ) -> str | tuple[InlineKeyboardMarkup, str]:
+          admin_service = await get_admin_service()
+          
+          markup, image = await admin_service.get_items(
+               session=session,
+               item="all"
+          )
+          count_button = markup.inline_keyboard[-1][0] # Inline button с количеством страниц. 1/5
+          if count_button.text.split("/")[-1] == str(callback.data_len): # 5 == data_len
+               return "Обновление предметов не найдено"  # Если нового предемета в базу не добавлено
+          return markup, image
           
           
 async def get_callback_admin_service() -> CallbackAdminService:

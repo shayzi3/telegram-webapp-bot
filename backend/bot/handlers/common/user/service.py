@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from dishka.async_container import AsyncContainer
 
-from db.repository import UserRepository
+from db.sql.repository import UserRepository
 from schemas import UserModel
 
 
