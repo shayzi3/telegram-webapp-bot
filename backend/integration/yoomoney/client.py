@@ -1,11 +1,12 @@
-from loguru import logger
 from aiogram.types import Message
 from httpx import AsyncClient
 from aiogram import Bot
 
 from bot.utils.inline_buttons import url_button_builder
-from .schema import YoomoneyResponse, PaymentType
 from core import settings
+from logs import logger
+from .schema import YoomoneyResponse, PaymentType
+
 
 
 
@@ -25,7 +26,7 @@ class YoomoneyManager:
           money > 1
           label <= 64
           """
-          logger.info(f"GENERATE PAYMENT LINK. LABEL: {label}")
+          logger.yoomoney.info(f"GENEATE NEW LINK. LABEL: {label} MONEY: {money}")
           
           body = {
                "receiver": settings.yoomoney_receiver,
@@ -61,7 +62,7 @@ class YoomoneyManager:
           
           
      async def on_success(self, response: YoomoneyResponse, bot: Bot) -> None:
-          logger.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id} LABEL: {response.label}")
+          logger.yoomoney.info(f"SUCCESS PAYMENT. OPERATION_ID: {response.operation_id} LABEL: {response.label}")
           
           await bot.send_message(
                chat_id=int(response.label),

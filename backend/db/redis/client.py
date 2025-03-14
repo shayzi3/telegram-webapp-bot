@@ -1,12 +1,12 @@
 import json
 
 from typing import Optional
-from loguru import logger
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Generic, TypeVar
 from redis.asyncio import Redis
 
 from core import settings
+from logs import logger
         
         
         
@@ -40,7 +40,7 @@ class RedisManager(Generic[M]):
      
      @classmethod
      async def get_from_redis(cls, key: str) -> Optional[M]:
-          logger.info(f"GET VALUE FROM REDIS {key}")
+          logger.redis.info(f"GET VALUE FROM REDIS {key}")
           
           async with get_redis_session() as redis:
                value = await redis.get(key)
@@ -51,7 +51,7 @@ class RedisManager(Generic[M]):
 
      
      async def write_in_redis(self) -> None:
-          logger.debug(f"WRITE VALUE IN REDIS {self.redis_key}")
+          logger.redis.info(f"WRITE VALUE IN REDIS {self.redis_key}")
           
           async with get_redis_session() as session:
                await session.set(
@@ -62,14 +62,14 @@ class RedisManager(Generic[M]):
              
      @classmethod  
      async def delete_from_redis(cls, *keys) -> None:
-          logger.debug(f"DELETE VALUE IN REDIS {keys}")
+          logger.redis.info(f"DELETE VALUE IN REDIS {keys}")
           
           async with get_redis_session() as session:
                await session.delete(*keys)
                
 
      async def offset_write(self, offset: int, limit: int) -> None:
-          logger.debug(f"WRITE OFFSET VALUE IN REDIS off={offset}lim={limit}")
+          logger.redis.info(f"WRITE OFFSET VALUE IN REDIS off={offset}lim={limit}")
           
           async with get_redis_session() as session:
                await session.set(

@@ -1,10 +1,11 @@
 from typing import Any, Generic, TypeVar, Optional
 from abc import ABC, abstractmethod
-from loguru import logger
 from sqlalchemy import insert, select, update, delete
-
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from db.redis import RedisManager
+from logs import logger
+
 
 
 
@@ -44,7 +45,7 @@ class Repository(Generic[Model], AbstractRepository):
      @classmethod
      async def create(cls, session: AsyncSession, **extras) -> None:
           """extras - values"""
-          logger.debug(f"INSERT data in {cls.model.__tablename__}: {extras}")
+          logger.sql.info(f"INSERT data in {cls.model.__tablename__}: {extras}")
           
           sttm = (
                insert(cls.model).
@@ -71,7 +72,7 @@ class Repository(Generic[Model], AbstractRepository):
                if value is not None:
                     return value
           
-          logger.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
+          logger.sql.info(f"SELECT data FROM {cls.model.__tablename__}: {extras}")
           sttm = select(cls.model).filter_by(**extras)
           result = await session.execute(sttm)
           scalar = result.scalar()
@@ -97,7 +98,7 @@ class Repository(Generic[Model], AbstractRepository):
           **extras
      ) -> None:
           """extras - values while need update"""
-          logger.debug(f"UPDATE data in {cls.model.__tablename__} WHERE {where} VALUES {extras}")
+          logger.sql.info(f"UPDATE data in {cls.model.__tablename__} WHERE {where} VALUES {extras}")
           
           sttm = (
                update(cls.model).filter_by(**where).values(**extras).returning(cls.model.id)
@@ -117,7 +118,7 @@ class Repository(Generic[Model], AbstractRepository):
           where: dict[str, Any],
           delete_redis_values: list[str] = []
      ) -> None:
-          logger.debug(f"DELETE data in {cls.model.__tablename__} WHERE {where}")
+          logger.sql.info(f"DELETE data in {cls.model.__tablename__} WHERE {where}")
           
           sttm = (
                delete(cls.model).filter_by(**where)

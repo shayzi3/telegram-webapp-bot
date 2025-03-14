@@ -13,7 +13,7 @@ pydantic
 
 
 
-Fronend:
+Frontend:
 
 flet
 pydantic
